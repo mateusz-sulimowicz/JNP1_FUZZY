@@ -145,8 +145,6 @@ private:
         } else {
             return std::strong_ordering::equal;
         }
-
-        // TODO: ładniej
     }
 
     friend class TriFuzzyNumSet;
