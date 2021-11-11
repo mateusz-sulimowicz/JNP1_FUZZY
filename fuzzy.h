@@ -1,82 +1,232 @@
 #ifndef FUZZY_H
 #define FUZZY_H
 
+#include <ostream>
 #include<set>
+#include <compare>
+#include <cmath>
 
-using real_t = double;
-using std::multiset;
+typedef double real_t;
+
+using std::move;
 
 class TriFuzzyNum {
 public:
-    TriFuzzyNum(real_t r1, real_t r2, real_t r3);
 
-    TriFuzzyNum(const TriFuzzyNum &that);
+    constexpr TriFuzzyNum(double r1, double r2, double r3) {
+        real_t r_min = std::min({r1, r2, r2});
+        real_t r_max = std::max({r1, r2, r3});
+        real_t r_mid = r1 + r2 + r3 - r_min - r_max;
+        lower = r_min;
+        modal = r_mid;
+        upper = r_max;
+    }
 
-    TriFuzzyNum(TriFuzzyNum &&that) noexcept;
+    constexpr TriFuzzyNum(const TriFuzzyNum &that) = default;
 
-    ~TriFuzzyNum();
+    constexpr TriFuzzyNum(TriFuzzyNum &&that) noexcept:
+            lower(move(that.lower)),
+            modal(move(that.modal)),
+            upper(move(that.upper)) {}
 
-    real_t lower_value() const;
+    [[nodiscard]] constexpr real_t lower_value() const { return lower; }
 
-    real_t upper_value() const;
+    [[nodiscard]] constexpr real_t upper_value() const { return upper; }
 
-    real_t modal_value() const;
+    [[nodiscard]] constexpr real_t modal_value() const { return modal; }
 
-    TriFuzzyNum &operator=(const TriFuzzyNum &that);
+    constexpr TriFuzzyNum &operator=(const TriFuzzyNum &that) {
+        if (this != &that) {
+            lower = that.lower;
+            modal = that.modal;
+            upper = that.upper;
+        }
+        return *this;
+    }
 
-    TriFuzzyNum &operator=(TriFuzzyNum &&that);
+    constexpr TriFuzzyNum &operator=(TriFuzzyNum &&that) noexcept {
+        if (this != &that) {
+            lower = move(that.lower);
+            modal = move(that.modal);
+            upper = move(that.upper);
+        }
+        return *this;
+    }
 
-    TriFuzzyNum &operator+=(const TriFuzzyNum &that);
+    constexpr TriFuzzyNum &operator+=(const TriFuzzyNum &that) {
+        return *this = *this + that;
+    }
 
-    TriFuzzyNum &operator-=(const TriFuzzyNum &that);
+    constexpr TriFuzzyNum &operator-=(const TriFuzzyNum &that) {
+        return *this = *this - that;
+    }
 
-    TriFuzzyNum &operator*=(const TriFuzzyNum &that);
+    constexpr TriFuzzyNum &operator*=(const TriFuzzyNum &that) {
+        return *this = *this * that;
+    }
 
 private:
     real_t lower;
     real_t modal;
     real_t upper;
 
-    friend std::ostream &operator<<(std::ostream &os, const TriFuzzyNum &that);
+    friend constexpr std::ostream &
+    operator<<(std::ostream &os, const TriFuzzyNum &that) {
+        os << "("
+           << that.lower
+           << ", "
+           << that.modal
+           << ", "
+           << that.upper
+           << ")";
+        return os;
+    }
 
-    friend const TriFuzzyNum operator+(const TriFuzzyNum &that);
+    friend constexpr TriFuzzyNum
+    operator+(const TriFuzzyNum &a, const TriFuzzyNum &b) {
+        return {a.lower + b.lower,
+                a.modal + b.modal,
+                a.upper + b.upper};
+    }
 
-    friend const TriFuzzyNum operator+(const TriFuzzyNum &that);
+    friend constexpr TriFuzzyNum
+    operator-(const TriFuzzyNum &a, const TriFuzzyNum &b) {
+        return {a.lower - b.upper,
+                a.modal - b.modal,
+                a.upper - b.lower};
+    }
 
-    friend const TriFuzzyNum operator*(const TriFuzzyNum &that);
+    friend constexpr TriFuzzyNum
+    operator*(const TriFuzzyNum &a, const TriFuzzyNum &b) {
+        return {a.lower * b.lower,
+                a.modal * b.modal,
+                a.upper * b.upper};
+    }
 
-    friend bool operator==(const TriFuzzyNum &f1, const TriFuzzyNum &f2);
+    friend constexpr bool
+    operator==(const TriFuzzyNum &f1, const TriFuzzyNum &f2) {
+        return f1.lower == f2.lower
+               && f1.modal == f2.modal
+               && f1.upper == f2.upper;
+    }
 
-    friend bool operator!=(const TriFuzzyNum &f1, const TriFuzzyNum &f2);
+    friend constexpr bool
+    operator!=(const TriFuzzyNum &f1, const TriFuzzyNum &f2) {
+        return f1.lower != f2.lower
+               || f1.modal != f2.modal
+               || f1.upper != f2.upper;
+    }
 
-    // TODO: porównania liczb rozmytych
-    friend auto operator<=>(const TriFuzzyNum &f1, const TriFuzzyNum &f2);
+    using fuzzy_rank = std::tuple<real_t, real_t, real_t>;
+
+    [[nodiscard]] constexpr fuzzy_rank rank() const {
+        real_t l = this->lower_value();
+        real_t m = this->modal_value();
+        real_t u = this->upper_value();
+
+        real_t z = (u - l) + sqrt(1 + (u - m) * (u - m)) +
+                   sqrt(1 + (m - l) * (m - l));
+        real_t y = (u - l) / z;
+        real_t x = ((u - l) * m + sqrt(1 + (u - m) * (u - m)) * l +
+                    sqrt(1 + (m - l) * (m - l)) * u) / z;
+
+        return {x, y, z};
+    }
+
+    friend constexpr std::strong_ordering
+    operator<=>(const TriFuzzyNum &a, const TriFuzzyNum &b) {
+        fuzzy_rank rank_a = a.rank();
+        fuzzy_rank rank_b = b.rank();
+
+        if (rank_a < rank_b) {
+            return std::strong_ordering::less;
+        } else if (rank_a > rank_b) {
+            return std::strong_ordering::greater;
+        } else {
+            return std::strong_ordering::equal;
+        }
+
+        // TODO: ładniej
+    }
+
+    friend class TriFuzzyNumSet;
+
 };
+
+consteval TriFuzzyNum crisp_number(real_t v) {
+    return {v, v, v};
+}
+
+constinit static TriFuzzyNum crisp_zero = crisp_number(0);
 
 class TriFuzzyNumSet {
 public:
-    TriFuzzyNumSet(std::initializer_list<TriFuzzyNum> nums) {};
 
-    TriFuzzyNumSet(const TriFuzzyNumSet& that);
+    TriFuzzyNumSet() = default;
 
-    TriFuzzyNumSet(TriFuzzyNumSet&& that);
+    TriFuzzyNumSet(std::initializer_list<TriFuzzyNum> nums)
+            : num_set(nums) {}
 
-    ~TriFuzzyNumSet();
+    TriFuzzyNumSet(const TriFuzzyNumSet &that) = default;
 
-    TriFuzzyNumSet &operator=(const TriFuzzyNumSet& that);
+    TriFuzzyNumSet(TriFuzzyNumSet &&that) noexcept: num_set(
+            move(that.num_set)) {}
 
-    TriFuzzyNumSet &operator=(TriFuzzyNumSet&& that);
+    TriFuzzyNumSet &operator=(const TriFuzzyNumSet &that) {
+        if (this != &that) {
+            this->num_set = that.num_set;
+        }
+        return *this;
+    }
 
-    void insert(const TriFuzzyNum &num);
+    TriFuzzyNumSet &operator=(TriFuzzyNumSet &&that) noexcept {
+        if (this != &that) {
+            this->num_set = move(that.num_set);
+        }
+        return *this;
+    }
 
-    void insert(TriFuzzyNum &&num);
+    void insert(const TriFuzzyNum &num) {
+        num_set.insert(num);
+    }
 
-    void remove(const TriFuzzyNum &num);
+    void insert(TriFuzzyNum &&num) {
+        num_set.insert(move(num));
+    }
 
-    TriFuzzyNum arithmetic_mean();
+    void remove(const TriFuzzyNum &num) {
+        auto itr = num_set.find(num);
+        if (itr != num_set.end()) {
+            num_set.erase(itr);
+        }
+    }
+
+    TriFuzzyNum arithmetic_mean() {
+        if (num_set.empty()) {
+            throw std::length_error(
+                    "TriFuzzyNumSet::arithmetic_mean - the set is empty.");
+        } else {
+            auto nums_amount = (double) num_set.size();
+            real_t sum_lower = 0;
+            real_t sum_modal = 0;
+            real_t sum_upper = 0;
+
+            for (const auto& num : num_set) {
+                sum_lower += num.lower;
+                sum_modal += num.modal;
+                sum_upper += num.upper;
+            }
+
+            return {sum_lower / nums_amount,
+                    sum_modal / nums_amount,
+                    sum_upper / nums_amount};
+        }
+    }
+
 
 private:
-    multiset<TriFuzzyNum> num_set;
+    std::multiset<TriFuzzyNum> num_set;
 };
+
 
 #endif //FUZZY_H
