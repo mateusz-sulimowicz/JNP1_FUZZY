@@ -2,7 +2,7 @@
 #define FUZZY_H
 
 #include <ostream>
-#include<set>
+#include <set>
 #include <compare>
 #include <cmath>
 
@@ -113,9 +113,9 @@ private:
     using fuzzy_rank = std::tuple<real_t, real_t, real_t>;
 
     [[nodiscard]] constexpr fuzzy_rank rank() const {
-        real_t l = this->lower_value();
-        real_t m = this->modal_value();
-        real_t u = this->upper_value();
+        real_t l = lower;
+        real_t m = modal;
+        real_t u = upper;
 
         real_t z = (u - l) + sqrt(1 + (u - m) * (u - m)) +
                    sqrt(1 + (m - l) * (m - l));
