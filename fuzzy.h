@@ -6,7 +6,6 @@
 #include <compare>
 #include <cmath>
 
-
 using std::move;
 
 using real_t = double;
@@ -176,10 +175,10 @@ public:
 
     TriFuzzyNumSet &operator=(TriFuzzyNumSet &&that) noexcept {
         if (this != &that) {
-            this->sum_lower = that.sum_lower;
-            this->sum_modal = that.sum_modal;
-            this->sum_upper = that.sum_upper;
-            this->num_set = move(that.num_set);
+            sum_lower = that.sum_lower;
+            sum_modal = that.sum_modal;
+            sum_upper = that.sum_upper;
+            num_set = move(that.num_set);
         }
         return *this;
     }
