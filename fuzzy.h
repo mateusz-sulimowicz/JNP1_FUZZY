@@ -35,20 +35,13 @@ public:
 
     [[nodiscard]] constexpr real_t modal_value() const { return modal; }
 
-    constexpr TriFuzzyNum &operator=(const TriFuzzyNum &that) {
-        if (this != &that) {
-            lower = that.lower;
-            modal = that.modal;
-            upper = that.upper;
-        }
-        return *this;
-    }
+    constexpr TriFuzzyNum &operator=(const TriFuzzyNum &that) = default;
 
     constexpr TriFuzzyNum &operator=(TriFuzzyNum &&that) noexcept {
         if (this != &that) {
-            lower = move(that.lower);
+            lower = that.lower;
             modal = move(that.modal);
-            upper = move(that.upper);
+            upper = that.upper;
         }
         return *this;
     }
@@ -162,39 +155,55 @@ public:
 
     TriFuzzyNumSet() = default;
 
-    TriFuzzyNumSet(std::initializer_list<TriFuzzyNum> nums)
-            : num_set(nums) {}
+    TriFuzzyNumSet(std::initializer_list<TriFuzzyNum> nums) :
+            sum_lower(0),
+            sum_modal(0),
+            sum_upper(0) {
+        for (auto &num: nums) {
+            insert(num);
+        }
+    }
 
     TriFuzzyNumSet(const TriFuzzyNumSet &that) = default;
 
-    TriFuzzyNumSet(TriFuzzyNumSet &&that) noexcept: num_set(
-            move(that.num_set)) {}
+    TriFuzzyNumSet(TriFuzzyNumSet &&that) noexcept:
+            num_set(move(that.num_set)),
+            sum_lower(move(that.sum_lower)),
+            sum_modal(move(that.sum_modal)),
+            sum_upper(move(that.sum_upper)) {}
 
-    TriFuzzyNumSet &operator=(const TriFuzzyNumSet &that) {
-        if (this != &that) {
-            this->num_set = that.num_set;
-        }
-        return *this;
-    }
+    TriFuzzyNumSet &operator=(const TriFuzzyNumSet &that) = default;
 
     TriFuzzyNumSet &operator=(TriFuzzyNumSet &&that) noexcept {
         if (this != &that) {
+            this->sum_lower = that.sum_lower;
+            this->sum_modal = that.sum_modal;
+            this->sum_upper = that.sum_upper;
             this->num_set = move(that.num_set);
         }
         return *this;
     }
 
     void insert(const TriFuzzyNum &num) {
+        sum_lower += num.lower;
+        sum_modal += num.modal;
+        sum_upper += num.upper;
         num_set.insert(num);
     }
 
     void insert(TriFuzzyNum &&num) {
+        sum_lower += num.lower;
+        sum_modal += num.modal;
+        sum_upper += num.upper;
         num_set.insert(move(num));
     }
 
     void remove(const TriFuzzyNum &num) {
         auto itr = num_set.find(num);
         if (itr != num_set.end()) {
+            sum_lower -= itr->lower;
+            sum_modal -= itr->modal;
+            sum_upper -= itr->upper;
             num_set.erase(itr);
         }
     }
@@ -205,25 +214,17 @@ public:
                     "TriFuzzyNumSet::arithmetic_mean - the set is empty.");
         } else {
             auto nums_amount = (double) num_set.size();
-            real_t sum_lower = 0;
-            real_t sum_modal = 0;
-            real_t sum_upper = 0;
-
-            for (const auto& num : num_set) {
-                sum_lower += num.lower;
-                sum_modal += num.modal;
-                sum_upper += num.upper;
-            }
-
             return {sum_lower / nums_amount,
                     sum_modal / nums_amount,
                     sum_upper / nums_amount};
         }
     }
 
-
 private:
     std::multiset<TriFuzzyNum> num_set;
+    real_t sum_lower{};
+    real_t sum_modal{};
+    real_t sum_upper{};
 };
 
 
