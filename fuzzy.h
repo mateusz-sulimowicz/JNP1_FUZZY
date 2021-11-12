@@ -6,9 +6,11 @@
 #include <compare>
 #include <cmath>
 
-typedef double real_t;
 
 using std::move;
+
+using real_t = double;
+using fuzzy_rank = std::tuple<real_t, real_t, real_t>;
 
 class TriFuzzyNum {
 public:
@@ -109,8 +111,6 @@ private:
                || f1.modal != f2.modal
                || f1.upper != f2.upper;
     }
-
-    using fuzzy_rank = std::tuple<real_t, real_t, real_t>;
 
     [[nodiscard]] constexpr fuzzy_rank rank() const {
         real_t l = lower;
