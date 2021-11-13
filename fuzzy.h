@@ -152,10 +152,7 @@ public:
 
     TriFuzzyNumSet() = default;
 
-    TriFuzzyNumSet(std::initializer_list<TriFuzzyNum> nums) :
-            sum_lower(0),
-            sum_modal(0),
-            sum_upper(0) {
+    TriFuzzyNumSet(std::initializer_list<TriFuzzyNum> nums) {
         for (auto &num: nums) {
             insert(num);
         }
@@ -218,10 +215,10 @@ public:
     }
 
 private:
-    std::multiset<TriFuzzyNum> num_set;
-    real_t sum_lower;
-    real_t sum_modal;
-    real_t sum_upper;
+    std::multiset<TriFuzzyNum> num_set{};
+    real_t sum_lower{};
+    real_t sum_modal{};
+    real_t sum_upper{};
 };
 
 #endif //FUZZY_H
