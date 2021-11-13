@@ -5,6 +5,7 @@
 #include <set>
 #include <compare>
 #include <cmath>
+#include <tuple> 
 
 using std::move;
 
@@ -64,7 +65,7 @@ private:
     real_t modal;
     real_t upper;
 
-    friend constexpr std::ostream &
+    friend std::ostream &
     operator<<(std::ostream &os, const TriFuzzyNum &that) {
         os << "("
            << that.lower << ", "
@@ -74,21 +75,21 @@ private:
         return os;
     }
 
-    friend constexpr TriFuzzyNum
+    friend constexpr const TriFuzzyNum
     operator+(const TriFuzzyNum &a, const TriFuzzyNum &b) {
         return {a.lower + b.lower,
                 a.modal + b.modal,
                 a.upper + b.upper};
     }
 
-    friend constexpr TriFuzzyNum
+    friend constexpr const TriFuzzyNum
     operator-(const TriFuzzyNum &a, const TriFuzzyNum &b) {
         return {a.lower - b.upper,
                 a.modal - b.modal,
                 a.upper - b.lower};
     }
 
-    friend constexpr TriFuzzyNum
+    friend constexpr const TriFuzzyNum
     operator*(const TriFuzzyNum &a, const TriFuzzyNum &b) {
         return {a.lower * b.lower,
                 a.modal * b.modal,
