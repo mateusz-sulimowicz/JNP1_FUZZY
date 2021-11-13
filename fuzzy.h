@@ -120,7 +120,7 @@ private:
         real_t x = ((u - l) * m + sqrt(1 + (u - m) * (u - m)) * l +
                     sqrt(1 + (m - l) * (m - l)) * u) / z;
 
-        return {x, y, z};
+        return {x - y / 2, 1 - y, m};
     }
 
     friend constexpr std::strong_ordering
