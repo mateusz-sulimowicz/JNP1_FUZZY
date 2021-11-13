@@ -40,9 +40,9 @@ public:
 
     constexpr TriFuzzyNum &operator=(TriFuzzyNum &&that) noexcept {
         if (this != &that) {
-            lower = that.lower;
+            lower = move(that.lower);
             modal = move(that.modal);
-            upper = that.upper;
+            upper = move(that.upper);
         }
         return *this;
     }
@@ -67,10 +67,8 @@ private:
     friend constexpr std::ostream &
     operator<<(std::ostream &os, const TriFuzzyNum &that) {
         os << "("
-           << that.lower
-           << ", "
-           << that.modal
-           << ", "
+           << that.lower << ", "
+           << that.modal << ", "
            << that.upper
            << ")";
         return os;
@@ -207,7 +205,7 @@ public:
         }
     }
 
-    TriFuzzyNum arithmetic_mean() {
+    [[nodiscard]] TriFuzzyNum arithmetic_mean() const {
         if (num_set.empty()) {
             throw std::length_error(
                     "TriFuzzyNumSet::arithmetic_mean - the set is empty.");
@@ -225,6 +223,5 @@ private:
     real_t sum_modal{};
     real_t sum_upper{};
 };
-
 
 #endif //FUZZY_H
