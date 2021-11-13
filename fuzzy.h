@@ -5,9 +5,11 @@
 #include <set>
 #include <compare>
 #include <cmath>
-#include <tuple> 
+#include <tuple>
 
 using std::move;
+using std::min;
+using std::max;
 
 using real_t = double;
 using fuzzy_rank = std::tuple<real_t, real_t, real_t>;
@@ -16,12 +18,9 @@ class TriFuzzyNum {
 public:
 
     constexpr TriFuzzyNum(double r1, double r2, double r3) {
-        real_t r_min = std::min({r1, r2, r3});
-        real_t r_max = std::max({r1, r2, r3});
-        real_t r_mid = r1 + r2 + r3 - r_min - r_max;
-        lower = r_min;
-        modal = r_mid;
-        upper = r_max;
+        lower = min({r1, r2, r3});
+        upper = max({r1, r2, r3});
+        modal = max(min(r1, r2), min(max(r1, r2), r3));
     }
 
     constexpr TriFuzzyNum(const TriFuzzyNum &that) = default;
