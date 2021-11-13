@@ -219,9 +219,9 @@ public:
 
 private:
     std::multiset<TriFuzzyNum> num_set;
-    real_t sum_lower{};
-    real_t sum_modal{};
-    real_t sum_upper{};
+    real_t sum_lower;
+    real_t sum_modal;
+    real_t sum_upper;
 };
 
 #endif //FUZZY_H
