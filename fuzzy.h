@@ -16,7 +16,7 @@ class TriFuzzyNum {
 public:
 
     constexpr TriFuzzyNum(double r1, double r2, double r3) {
-        real_t r_min = std::min({r1, r2, r2});
+        real_t r_min = std::min({r1, r2, r3});
         real_t r_max = std::max({r1, r2, r3});
         real_t r_mid = r1 + r2 + r3 - r_min - r_max;
         lower = r_min;
