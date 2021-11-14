@@ -25,10 +25,7 @@ public:
 
     constexpr TriFuzzyNum(const TriFuzzyNum &that) = default;
 
-    constexpr TriFuzzyNum(TriFuzzyNum &&that) noexcept:
-            lower(move(that.lower)),
-            modal(move(that.modal)),
-            upper(move(that.upper)) {}
+    constexpr TriFuzzyNum(TriFuzzyNum &&that) = default;
 
     [[nodiscard]] constexpr real_t lower_value() const { return lower; }
 
@@ -40,9 +37,9 @@ public:
 
     constexpr TriFuzzyNum &operator=(TriFuzzyNum &&that) noexcept {
         if (this != &that) {
-            lower = move(that.lower);
-            modal = move(that.modal);
-            upper = move(that.upper);
+            lower = that.lower;
+            modal = that.modal;
+            upper = that.upper;
         }
         return *this;
     }
