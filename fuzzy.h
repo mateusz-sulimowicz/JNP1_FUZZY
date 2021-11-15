@@ -120,18 +120,9 @@ private:
         return {x - y / 2, 1 - y, m};
     }
 
-    friend constexpr std::strong_ordering
+    friend constexpr auto
     operator<=>(const TriFuzzyNum &a, const TriFuzzyNum &b) {
-        fuzzy_rank rank_a = a.rank();
-        fuzzy_rank rank_b = b.rank();
-
-        if (rank_a < rank_b) {
-            return std::strong_ordering::less;
-        } else if (rank_a > rank_b) {
-            return std::strong_ordering::greater;
-        } else {
-            return std::strong_ordering::equal;
-        }
+        return a.rank() <=> b.rank();
     }
 
     friend class TriFuzzyNumSet;
