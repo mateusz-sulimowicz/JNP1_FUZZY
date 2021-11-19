@@ -174,12 +174,12 @@ public:
             throw std::length_error(
                     "TriFuzzyNumSet::arithmetic_mean - the set is empty.");
         } else {
-            auto nums_amount = (double) num_set.size();
+            size_t nums_amount = num_set.size();
             real_t sum_lower = 0;
             real_t sum_modal = 0;
             real_t sum_upper = 0;
 
-            for (const auto &num: num_set) {
+            for (const TriFuzzyNum &num: num_set) {
                 sum_lower += num.lower_value();
                 sum_modal += num.modal_value();
                 sum_upper += num.upper_value();
