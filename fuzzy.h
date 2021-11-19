@@ -125,8 +125,6 @@ private:
         return a.rank() <=> b.rank();
     }
 
-    friend class TriFuzzyNumSet;
-
 };
 
 consteval TriFuzzyNum crisp_number(real_t v) {
@@ -181,10 +179,10 @@ public:
             real_t sum_modal = 0;
             real_t sum_upper = 0;
 
-            for (auto &num: num_set) {
-                sum_lower += num.lower;
-                sum_modal += num.modal;
-                sum_upper += num.upper;
+            for (const auto &num: num_set) {
+                sum_lower += num.lower_value();
+                sum_modal += num.modal_value();
+                sum_upper += num.upper_value();
             }
 
             return {sum_lower / nums_amount,
