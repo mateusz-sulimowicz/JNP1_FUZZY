@@ -159,7 +159,7 @@ public:
     }
 
     void insert(TriFuzzyNum &&num) {
-        num_set.insert(move(num));
+        num_set.insert(num);
     }
 
     void remove(const TriFuzzyNum &num) {
